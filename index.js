@@ -8,69 +8,41 @@ const PORT = 3000;
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.get('/', async (req, res) => {
-    const animeName = req.query.name;
-
-    if (animeName) {
-        try {
-            const response = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(animeName)}&limit=1`);
-            const anime = response.data.data[0];
-
-            if (anime) {
-                // INYECCIÓN DE CRUNCHYROLL: Creamos el link de búsqueda automática
-                const crunchyrollLink = { 
-                    name: '⭐ Crunchyroll (Recomendado)', 
-                    url: `https://www.crunchyroll.com/search?q=${encodeURIComponent(anime.title)}` 
-                };
-
-                // Combinamos con los links que traiga la API
-                let otherLinks = [];
-                if (anime.external) otherLinks = [...anime.external];
-                if (anime.streaming) otherLinks = [...otherLinks, ...anime.streaming];
-
-                // El link de Crunchyroll siempre va primero
-                const finalLinks = [crunchyrollLink, ...otherLinks];
-
-                return res.send(template(
-                    anime.title, 
-                    anime.images.jpg.large_image_url, 
-                    anime.mal_id, 
-                    anime.synopsis,
-                    "BÚSQUEDA",
-                    { score: anime.score || "N/A", episodes: anime.episodes || "?", type: anime.type || "TV" },
-                    { trailer: anime.trailer.embed_url, external: finalLinks }
-                ));
-            }
-            return res.send(template("No encontrado", null, "404", "No hay registros.", "ERROR"));
-        } catch (error) {
-            return res.send(template("Error", null, "500", "Error de conexión.", "ERROR"));
-        }
-    }
-
-    // Sugerencia Aleatoria al entrar
     try {
-        const response = await axios.get('https://api.jikan.moe/v4/random/anime');
-        const anime = response.data.data;
-        
-        const crunchyrollLink = { 
-            name: '⭐ Crunchyroll (Recomendado)', 
-            url: `https://www.crunchyroll.com/search?q=${encodeURIComponent(anime.title)}` 
-        };
-
-        return res.send(template(
-            `✨ Sugerencia: ${anime.title}`, 
-            anime.images.jpg.large_image_url, 
-            anime.mal_id, 
-            anime.synopsis,
-            "ALEATORIO",
-            { score: anime.score || "N/A", episodes: anime.episodes || "?", type: anime.type || "TV" },
-            { trailer: anime.trailer.embed_url, external: [crunchyrollLink, ...(anime.external || [])] }
-        ));
-    } catch (error) {
-        return res.send(template("Bienvenido", null, "000", "Busca un anime.", "BÚSQUEDA"));
+        const resp = await axios.get('https://api.jikan.moe/v4/top/anime?limit=15');
+        const tendencias = resp.data.data;
+        const randomHero = tendencias[Math.floor(Math.random() * tendencias.length)];
+        res.send(template.renderHome(randomHero, tendencias));
+    } catch (e) {
+        res.status(500).send("Error al cargar la portada.");
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`--- SERVIDOR ANIME-HUB ONLINE (Modo Atajos) ---`);
+app.get('/api/search', async (req, res) => {
+    const q = req.query.q;
+    if (!q || q.length < 3) return res.json([]);
+    try {
+        const response = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=6`);
+        res.json(response.data.data);
+    } catch (e) { res.json([]); }
 });
+
+app.get('/search', async (req, res) => {
+    const q = req.query.q;
+    try {
+        const response = await axios.get(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=20`);
+        res.send(template.renderSearchResults(q, response.data.data));
+    } catch (e) { res.send("Error en la búsqueda."); }
+});
+
+app.get('/anime/:id', async (req, res) => {
+    try {
+        const response = await axios.get(`https://api.jikan.moe/v4/anime/${req.params.id}`);
+        const anime = response.data.data;
+        const links = [{ name: '⭐ Crunchyroll', url: `https://www.crunchyroll.com/search?q=${encodeURIComponent(anime.title)}` }];
+        res.send(template.renderDetail(anime, links));
+    } catch (e) { res.send("Error al cargar detalles."); }
+});
+
+app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
 
