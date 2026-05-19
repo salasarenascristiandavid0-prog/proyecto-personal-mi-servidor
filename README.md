@@ -39,6 +39,38 @@ Este es el backend y servidor principal para el motor de búsqueda de anime. Est
 Sigue estos pasos para clonar el repositorio y ejecutar el servidor localmente:
 
 ### 1. Clonar el repositorio
-```bash
-git clone [https://github.com/salasarenascristiandavid0-prog/](https://github.com/TU_USUARIO/TU_REPOSITORIO.git)
-cd TU_REPOSITORIO
+
+git clone [https://github.com/salasarenascristiandavid0-prog [https://github.com/salasarenascristiandavid0-prog/proyecto-personal-mi-servidor.git] cd mi-servidor
+
+---
+
+## 2.Instalar dependencias
+Asegúrate de tener Node.js instalado en tu sistema o entorno de desarrollo.
+
+bash 
+npm install
+
+🖥️ Uso y Despliegue
+Modo de Desarrollo
+Para lanzar el servidor con recarga automática (si usas nodemon):
+
+bash
+npm run dev
+
+Modo de Producción
+Para iniciar el servidor de forma estándar:
+
+bash
+npm start
+
+El servidor estará escuchando por defecto en: http://localhost:3000
+
+⚙️ Requisitos
+Node.js v18 o superior
+npm v9 o superior
+---
+
+### ¿Cómo personalizarlo rápido?
+1. **Rutas:** En la tabla de *Endpoints*, cambia o añade las rutas reales que ya tengas programadas en tu archivo de rutas.
+2. **Repositorio:** Cambia la URL del comando `git clone` por la tuya de GitHub cuando lo subas.
+
