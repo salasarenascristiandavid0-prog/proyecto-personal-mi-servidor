@@ -58,7 +58,7 @@ app.get('/anime/:id', async (req, res) => {
     try {
         const resp = await axios.get(`https://api.jikan.moe/v4/anime/${req.params.id}`);
         const a = resp.data.data;
-        const links = [{ name: 'Core 🟠 Crunchyroll', url: `https://www.crunchyroll.com/search?q=${encodeURIComponent(a.title)}` }];
+        const links = [{ name: '🟠 Crunchyroll', url: `https://www.crunchyroll.com/search?q=${encodeURIComponent(a.title)}` }];
         res.send(template.renderDetail(a, links));
     } catch (e) { 
         res.send("No encontrado."); 
